@@ -1,26 +1,18 @@
-// FilterContext.tsx
-import React, { createContext, useState, ReactNode } from "react";
+import React, { createContext, useState } from "react";
+import { FilterParams } from "@/common/types";
+import { FilterContextType } from "@/common/types";
+import { FilterContextProviderProps } from "@/common/types";
 
-interface FilterParams {
-  country?: string;
-  wrestler?: string;
-}
 
-interface FilterContextType {
-  filterParams: FilterParams;
-  setFilterParams: React.Dispatch<React.SetStateAction<FilterParams>>;
-}
+
 
 export const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
-interface FilterContextProviderProps {
-  children: ReactNode;
-}
 
 const FilterContextProvider: React.FC<FilterContextProviderProps> = ({ children }) => {
   const [filterParams, setFilterParams] = useState<FilterParams>({
     country: undefined,
-    wrestler: undefined, // fighter_id
+    wrestler: undefined,
   });
 
   return (

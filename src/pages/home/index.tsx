@@ -1,218 +1,107 @@
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, } from "@/common/components/ui/select"
 import { Button } from "@/common/components/ui/button";
-import useSWR from "swr";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { getData } from '../../services/api/requests.ts';
 import { FilterContext } from '../../context/FilterContext.tsx';
 import { filterEndpoints } from '../../services/api/endpoints.ts';
-
+import useSWR from "swr";
 import ChangeArrows from '/changeArrows.svg'
-import Earth from '/icons/earth.svg'
-
-export default function Home() {
-
-  const { filterParams, setFilterParams, } = useContext(FilterContext);
-
-  const { data: countries } = useSWR(filterEndpoints.countries, getData);
-  const { data: fighters } = useSWR(filterParams?.country ? filterEndpoints.fighters(filterParams.country) : null, getData);
-  console.log(countries)
-  console.log(fighters)
-
-  const [defaultCountry, setDefaultCountry] = useState('aze');
-  const [defaultWrestler, setDefaultWrestler] = useState(21493);
-
-  useEffect(() => {
-    setFilterParams(prev => ({
-      ...prev,
-      country: defaultCountry,
-      wrestler: defaultWrestler,
-    }));
-  }, []);
+import CustomSelect from "@/components/CustomSelect.tsx";
+import { useForm } from 'react-hook-form';
+// import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form"
+// import { toast } from "@/components/ui/use-toast"
+// import { zodResolver } from "@hookform/resolvers/zod"
+// import { z } from "zod"
 
 
-  const data = [
-    {
-      country: {
-        name: "AZE",
-        flag: "🇦🇿",
-      },
-      opponents: [
-        {
-          name: "HAJI ALIYEV",
-        },
-        {
-          name: "HAJI ALIYEV 1",
-        },
-        {
-          name: "HAJI ALIYEV 2",
-        },
-        {
-          name: "HAJI ALIYEV 3",
-        },
-        {
-          name: "HAJI ALIYEV 4",
-        },
-      ],
-    },
-    {
-      country: {
-        name: "RUS",
-        flag: "🇷🇺",
-      },
-      opponents: [
-        {
-          name: "AMIRBEK SULTANOV",
-        },
-        {
-          name: "AMIRBEK SULTANOV 1",
-        },
-        {
-          name: "AMIRBEK SULTANOV 2",
-        },
-        {
-          name: "AMIRBEK SULTANOV 3",
-        },
-        {
-          name: "AMIRBEK SULTANOV 4",
-        },
-      ],
-    },
-  ];
-// return null
+interface HomeProps { }
+
+interface FormData {
+  wrestlerLeft: string;
+  wrestlerRight: string;
+}
+
+const Home: React.FC<HomeProps> = () => {
+  const { filterParams, setFilterParams } = useContext(FilterContext);
+  const { data: countriesLeft } = useSWR(filterEndpoints.countries, getData);
+  const { data: countriesRight } = useSWR(filterEndpoints.countries, getData);
+  const { data: fightersLeft } = useSWR(filterParams?.countryLeft ? filterEndpoints.fighters(filterParams.countryLeft) : null, getData);
+  const { data: fightersRight } = useSWR(filterParams?.countryRight ? filterEndpoints.fighters(filterParams.countryRight) : null, getData);
+  const { register, handleSubmit } = useForm<FormData>();
+
+  const onSubmit = (data: FormData) => { console.log(data) };
+
+  const handleCountryChangeLeft = (selectedCountry: string | undefined) => {
+    setFilterParams((prev: any) => ({ ...prev, countryLeft: selectedCountry }));
+  };
+
+  const handleCountryChangeRight = (selectedCountry: string | undefined) => {
+    setFilterParams((prev: any) => ({ ...prev, countryRight: selectedCountry }));
+  };
 
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none">
-      <div className="h-64 bg-[#3746772E] container w-6/12 flex justify-between items-center ">
+    <div className="w-full flex flex-col items-center justify-center select-none ">
 
-        <div className="text-[#D8D8D8]">
-          <p className="flex gap-1">Country <img src={Earth} alt="" width={20} /> </p>
-          <Select >
-            <SelectTrigger className="w-[180px]  bg-[#0F1322] border border-[#373A45] rounded">
-              <SelectValue placeholder='aze' />
-            </SelectTrigger>
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <div className="h-64 bg-[#3746772E] text-[#D8D8D8] container md:w-4/5 lg:w-8/12 xl:w-6/12 w-full flex justify-between items-center 2xl:flex 2xl:flex-col ">
 
-            <SelectContent className="bg-[#0F1322] text-[#D8D8D8]">
-              <SelectGroup className="">
-                {countries?.map((item: any, index: any) => (
-                  <div key={index}>
-                    <SelectItem value={item.data}>{item.data} </SelectItem>
-                  </div>
-                ))}
+          <div className="">
 
-              </SelectGroup>
-            </SelectContent>
+            <CustomSelect
+              title="Country"
+              options={countriesRight}
+              placeholder="aze 🇦🇿"
+              value={filterParams.countryRight}
+              onChange={handleCountryChangeRight}
+            />
 
-            {/* <Select
-              id={"country"}
-              name={"Country"}
-              data={countries}
-              value={filterParams}
-              setValue={setFilterParams}
-              filterDialog={filterDialog}
-              setFilterDialog={setFilterDialog}
-            /> */}
-          </Select>
+            <CustomSelect
+              title="Opponents 1"
+              options={fightersRight}
+              placeholder="Haji ALIYEV"
+              value={filterParams.wrestlerRight}
+              {...register(filterParams.wrestlerRight)}
+              onChange={(selectedWrestler) => setFilterParams((prev: any) => ({ ...prev, wrestlerRight: selectedWrestler }))}
+            />
 
+          </div>
 
-          <p>Opponents</p>
-          <Select >
-            <SelectTrigger className="w-[180px]  bg-[#0F1322] border border-[#373A45] rounded">
-              <SelectValue  placeholder='haji aliyev'/>
-            </SelectTrigger>
+          <img src={ChangeArrows} alt="" />
 
-            <SelectContent className="bg-[#0F1322] text-[#D8D8D8]">
-              <SelectGroup className="">
-              {fighters?.map((item: any, index: any) => (
-                  <div key={index}>
-                    <SelectItem value={item.data}>{item.data} </SelectItem>
-                  </div>
-                ))}
+          <div>
 
-              </SelectGroup>
-              
-              
+            <CustomSelect
+              title="Country"
+              options={countriesLeft}
+              placeholder="Rus 🇷🇺"
+              value={filterParams.countryLeft}
+              onChange={handleCountryChangeLeft}
+            />
 
-            </SelectContent>
+            <CustomSelect
+              title="Opponents 2"
+              options={fightersLeft}
+              placeholder="Amirbek Sultanov"
+              value={filterParams.wrestlerLeft}
+              {...register(filterParams.wrestlerLeft)}
+              onChange={(selectedWrestler) => setFilterParams((prev: any) => ({ ...prev, wrestlerLeft: selectedWrestler }))}
+            />
 
-            {/* <Select
-              id={"wrestler"}
-              name={"Fighter"}
-              data={fighters}
-              value={filterParams}
-              setValue={setFilterParams}
-              filterDialog={filterDialog}
-              setFilterDialog={setFilterDialog}
-            /> */}
+          </div>
 
-          </Select>
         </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <img src={ChangeArrows} alt="" />
-
-
-        <div className="text-[#D8D8D8]">
-          <p className="flex gap-1">Country <img src={Earth} alt="" width={20} /> </p>
-
-
-          <Select >
-            <SelectTrigger className="w-[180px]  bg-[#0F1322] border border-[#373A45] rounded">
-              <SelectValue placeholder={`${data[1].country.name} ${data[1].country.flag} `} />
-            </SelectTrigger>
-
-            <SelectContent className="bg-[#0F1322] text-[#D8D8D8]">
-              <SelectGroup className="">
-                {data.map((item, index) => (
-                  <div key={index}>
-                    <SelectItem value={item.country.name}>{item.country.name} {item.country.flag}</SelectItem>
-                  </div>
-                ))}
-
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-
-          <p>Opponents</p>
-          <Select >
-            <SelectTrigger className="w-[180px]  bg-[#0F1322] border border-[#373A45] rounded">
-              <SelectValue placeholder={data[1].opponents[1].name} />
-            </SelectTrigger>
-
-            <SelectContent className="bg-[#0F1322] text-[#D8D8D8]">
-              <SelectGroup className="">
-                {data[1].opponents.map((item, index) => (
-                  <div key={index}>
-                    <SelectItem value={item.name}>{item.name}</SelectItem>
-                  </div>
-                ))}
-
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="mt-5 flex justify-center">
+          <Button type="submit" className="bg-[#374677] rounded text-lg p-7 font-semibold" >Predict match result</Button>
         </div>
+      </form>
 
-      </div>
 
-      <div className="mt-3  ">
-        <Button type="submit" className="bg-[#374677] rounded text-lg p-7 font-semibold" >Predict match result</Button>
-      </div>
 
-      <div className="text-[#D8D8D8] text-center mt-10 text-2xl">
+
+
+
+      <div className="text-[#D8D8D8] text-center  mt-10 text-2xl">
         <p>Predicted Winner:  <span className="text-[#28F449] ml-10">Amirbek Sultanov</span></p>
         <p className="my-3">Probabilty:  <span className="text-[#289FF4] text-[40px] ml-20">72%</span></p>
         <p>Point difference:  <span className="text-[#CB700E] ml-9">5</span></p>
@@ -223,8 +112,5 @@ export default function Home() {
 }
 
 
-// import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form"
-// import Link from "next/link"
-// import { zodResolver } from "@hookform/resolvers/zod"
-// import { useForm } from "react-hook-form"
-// import { z } from "zod"
+
+export default Home;

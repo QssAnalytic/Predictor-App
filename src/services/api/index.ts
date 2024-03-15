@@ -1,8 +1,8 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
-const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-console.log(apiEndpoint)
-const instance = axios.create({
+const apiEndpoint: string = import.meta.env.VITE_API_ENDPOINT;
+console.log(apiEndpoint);
+const instance: AxiosInstance = axios.create({
   baseURL: apiEndpoint,
 });
 
