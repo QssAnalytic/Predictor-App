@@ -1,43 +1,47 @@
-import { Button } from "@/common/components/ui/button";
-import { useContext } from "react";
-import { getData } from '../../services/api/requests.ts';
-import { FilterContext } from '../../context/FilterContext.tsx';
-import { filterEndpoints } from '../../services/api/endpoints.ts';
-import useSWR from "swr";
 import ChangeArrows from '/changeArrows.svg'
 import CustomSelect from "@/components/CustomSelect.tsx";
-import { useForm } from 'react-hook-form';
-// import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form"
-// import { toast } from "@/components/ui/use-toast"
-// import { zodResolver } from "@hookform/resolvers/zod"
-// import { z } from "zod"
+import { Button } from "@/common/components/ui/button";
+import { getData } from '../../services/api/requests.ts';
+import { filterEndpoints } from '../../services/api/endpoints.ts';
+import { Controller, useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { FormData,  Country, Fighter } from "@/common/types/index.ts";
+
+const Home = () => {
+  const { control, handleSubmit, watch } = useForm<FormData>();
+
+  const [countriesLeft, setCountriesLeft] = useState<Country[]>([]);
+  const [countriesRight, setCountriesRight] = useState<Country[]>([]);
+  const [fightersLeft, setFightersLeft] = useState<Fighter[]>([]);
+  const [fightersRight, setFightersRight] = useState<Fighter[]>([]);
+
+  const countryLeft = watch('countriesLeft');
+  const countryRight = watch('countriesRight');
 
 
-interface HomeProps { }
 
-interface FormData {
-  wrestlerLeft: string;
-  wrestlerRight: string;
-}
+  useEffect(() => {
+    const fetchData = async () => {
+      const leftCountriesData: Country[] = await getData(filterEndpoints.countries);
+      setCountriesLeft(leftCountriesData);
 
-const Home: React.FC<HomeProps> = () => {
-  const { filterParams, setFilterParams } = useContext(FilterContext);
-  const { data: countriesLeft } = useSWR(filterEndpoints.countries, getData);
-  const { data: countriesRight } = useSWR(filterEndpoints.countries, getData);
-  const { data: fightersLeft } = useSWR(filterParams?.countryLeft ? filterEndpoints.fighters(filterParams.countryLeft) : null, getData);
-  const { data: fightersRight } = useSWR(filterParams?.countryRight ? filterEndpoints.fighters(filterParams.countryRight) : null, getData);
-  const { register, handleSubmit } = useForm<FormData>();
+      const rightCountriesData: Country[] = await getData(filterEndpoints.countries);
+      setCountriesRight(rightCountriesData);
 
-  const onSubmit = (data: FormData) => { console.log(data) };
+      const leftFightersData: Fighter[] = await getData(countryLeft ? filterEndpoints.fighters(countryLeft) : null);
+      setFightersLeft(leftFightersData);
 
-  const handleCountryChangeLeft = (selectedCountry: string | undefined) => {
-    setFilterParams((prev: any) => ({ ...prev, countryLeft: selectedCountry }));
+      const rightFightersData: Fighter[] = await getData(countryRight ? filterEndpoints.fighters(countryRight) : null);
+      setFightersRight(rightFightersData);
+    };
+
+    fetchData();
+  }, [countryLeft, countryRight]);
+
+  const onSubmit = (data: FormData) => {
+    alert(`Opponent 1 =>${data.wrestlerLeft}, \nOpponent 2 => ${data.wrestlerRight}`);
+
   };
-
-  const handleCountryChangeRight = (selectedCountry: string | undefined) => {
-    setFilterParams((prev: any) => ({ ...prev, countryRight: selectedCountry }));
-  };
-
 
   return (
     <div className="w-full flex flex-col items-center justify-center select-none ">
@@ -45,61 +49,72 @@ const Home: React.FC<HomeProps> = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="h-64 bg-[#3746772E] text-[#D8D8D8] container md:w-4/5 lg:w-8/12 xl:w-6/12 w-full flex justify-between items-center 2xl:flex 2xl:flex-col ">
 
-          <div className="">
-
-            <CustomSelect
-              title="Country"
-              options={countriesRight}
-              placeholder="aze 🇦🇿"
-              value={filterParams.countryRight}
-              onChange={handleCountryChangeRight}
-            />
-
-            <CustomSelect
-              title="Opponents 1"
-              options={fightersRight}
-              placeholder="Haji ALIYEV"
-              value={filterParams.wrestlerRight}
-              {...register(filterParams.wrestlerRight)}
-              onChange={(selectedWrestler) => setFilterParams((prev: any) => ({ ...prev, wrestlerRight: selectedWrestler }))}
-            />
-
-          </div>
-
-          <img src={ChangeArrows} alt="" />
-
           <div>
-
-            <CustomSelect
-              title="Country"
-              options={countriesLeft}
-              placeholder="Rus 🇷🇺"
-              value={filterParams.countryLeft}
-              onChange={handleCountryChangeLeft}
+            <Controller
+              name="countriesLeft"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  title="Country"
+                  options={countriesLeft}
+                  placeholder="aze 🇦🇿"
+                  {...field}
+                />
+              )}
             />
 
-            <CustomSelect
-              title="Opponents 2"
-              options={fightersLeft}
-              placeholder="Amirbek Sultanov"
-              value={filterParams.wrestlerLeft}
-              {...register(filterParams.wrestlerLeft)}
-              onChange={(selectedWrestler) => setFilterParams((prev: any) => ({ ...prev, wrestlerLeft: selectedWrestler }))}
+            <Controller
+              name="wrestlerLeft"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  title="Opponents 1"
+                  options={fightersLeft}
+                  placeholder="Haji ALIYEV"
+                  {...field}
+                />
+              )}
             />
 
           </div>
 
+          <Button type="button" className="bg-transparent">
+            <img src={ChangeArrows} alt="" />
+          </Button>
+
+          <div className="">
+            <Controller
+              name="countriesRight"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  title="Country"
+                  options={countriesRight}
+                  placeholder="Rus 🇷🇺"
+                  {...field}
+                />
+              )}
+            />
+            <Controller
+              name="wrestlerRight"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  title="Opponents 2"
+                  options={fightersRight}
+                  placeholder="Amirbek Sultanov"
+                  {...field}
+                />
+              )}
+            />
+
+          </div>
         </div>
 
         <div className="mt-5 flex justify-center">
           <Button type="submit" className="bg-[#374677] rounded text-lg p-7 font-semibold" >Predict match result</Button>
         </div>
       </form>
-
-
-
-
-
 
       <div className="text-[#D8D8D8] text-center  mt-10 text-2xl">
         <p>Predicted Winner:  <span className="text-[#28F449] ml-10">Amirbek Sultanov</span></p>
@@ -110,7 +125,5 @@ const Home: React.FC<HomeProps> = () => {
     </div>
   );
 }
-
-
 
 export default Home;

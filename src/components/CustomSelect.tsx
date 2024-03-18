@@ -2,12 +2,12 @@ import Earth from '/icons/earth.svg'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, } from "@/common/components/ui/select"
 import { CustomSelectProps } from '@/common/types';
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ title, options, placeholder, value, onChange }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({ title, options, placeholder, value, onChange, name }) => {
     return (
         <div className="text-[#D8D8D8] ">
             <div>
                 <p className="flex gap-1 mb-2 mt-4 ">{title} <img src={Earth} alt="" width={20} /> </p>
-                <Select onValueChange={onChange} value={value}>
+                <Select name={name} onValueChange={onChange} value={value}>
                     <SelectTrigger className="bg-[#0F1322]">
                         <SelectValue placeholder={placeholder} />
                     </SelectTrigger>

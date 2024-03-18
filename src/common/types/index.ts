@@ -1,33 +1,39 @@
-//UI Components
-
-import { ReactNode } from "react";
-
 interface CustomSelectProps {
     title: string;
     options: Option[];
     placeholder: string;
-    value: string | undefined;
-    onChange: (selectedValue: string) => void;
+    value?: string;
+    onChange?: (selectedValue: string) => void;
+    name?: string;
 }
 
 interface Option {
     data: string
 }
 
-
-//Context
-
-interface FilterParams {
-    country?: string;
-    wrestler?: string;
+interface FormData {
+    wrestlerLeft: string;
+    wrestlerRight: string;
+    countriesRight: string;
+    countriesLeft: string;
 }
 
-interface FilterContextType {
-    filterParams: FilterParams;
-    setFilterParams: React.Dispatch<React.SetStateAction<FilterParams>>;
-}
-interface FilterContextProviderProps {
-    children: ReactNode;
+
+
+interface Country {
+    countryRight?: string;
+    countryLeft?: string;
 }
 
-export type { CustomSelectProps, FilterParams, FilterContextType, FilterContextProviderProps };
+interface Fighter {
+    wrestlerLeft?: string;
+    wrestlerRight?: string;
+}
+
+interface GetData {
+    countries: Country[];
+    fighters: Fighter[];
+}
+
+
+export type { CustomSelectProps, FormData, GetData,Fighter,Country };
